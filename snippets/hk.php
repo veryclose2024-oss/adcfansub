@@ -1,7 +1,7 @@
 <?php
 
 /**
- * HK · History King (Mini Games, 8. oyun, yeni 2026-10-23) · çekirdek
+ * HK · History King (8. oyun, kendi şeridi, yeni 2026-10-23) · çekirdek
  * Hearts of Iron / Europa tarzı mini strateji: tarihin 10 büyük devletinden birini seç (Osmanlı, Roma, Moğol, Britanya, Fransa,
  * Rusya, Çin, Japonya, İspanya, Safevi), 102 illik piksel haritada 30 turda (7,5 yıl) topraklarını büyüt. Savaş (arazi, kale, kış,
  * çok yönlü saldırı, kuşatma), ekonomi (gelir, maaş, iflas), ikmal, diplomasi (savaş ilanı, barış, tehdit → koalisyon),
@@ -132,15 +132,7 @@ function adc_hk_gunun_ulusu( $tarih ) {
     return ( ( $h % $u ) + $u ) % $u;
 }
 
-// Mini Games şeridine ikon
-add_filter( 'adc_mini_oyunlar', function( $oyunlar ) {
-    $oyunlar[] = array(
-        'id'   => 'hk',
-        'ad'   => 'History King',
-        'ikon' => '<span style="display:block;flex:none;width:32px;height:32px;background:#f4efff;line-height:0;padding-top:4px;box-sizing:border-box;">' . adc_hk_logo( 22, 'display:block;margin:0 auto;width:26px;height:22px;' ) . '</span>',
-    );
-    return $oyunlar;
-} );
+// Mini Games'te kutucuk yok: HK'nin kendi şeridi var ("HK - şerit", Underworld'ün üstünde)
 
 // Oyun duyuruları + bildirimler + Haftanın Gamer'ı (o snippet'ler açıksa kendiliğinden)
 add_filter( 'adc_oyun_duyuru_oyunlar', function( $o ) {
