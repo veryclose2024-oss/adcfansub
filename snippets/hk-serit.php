@@ -28,13 +28,13 @@ add_action( 'bp_before_directory_activity_content', function() {
     foreach ( $uluslar as $u ) { $adlar[] = $u['ad']; }
 
     echo '<a id="adc-hks" class="adc-hks" href="#hk" data-adc-oyun="hk">';
-    echo '<span class="adc-hks-sol">' . adc_hk_logo( 34 ) . '<span class="adc-hks-ad"><b>HISTORY KING</b><small>strateji · 10 devlet · 102 il</small></span></span>';
-    echo '<span class="adc-hks-orta">';
+    echo '<span class="adc-hks-sol">' . adc_hk_logo( 34 ) . '</span>';
+    echo '<span class="adc-hks-orta"><span class="adc-hks-ad"><b>HISTORY KING</b><small>strateji · 10 devlet · 102 il</small></span>';
     echo '<span class="adc-hks-satir">📅 Günün Seferi: <i style="background:' . esc_attr( $gu['renk'] ) . '"></i><b>' . esc_html( $gu['ad'] ) . '</b></span>';
     if ( $zirve ) {
         echo '<span class="adc-hks-satir">👑 Zirvede <b>' . esc_html( $zirve['ad'] ) . '</b> · ' . (int) $zirve['deger'] . ' · ' . esc_html( $zirve['unvan'] ) . '</span>';
     } else {
-        echo '<span class="adc-hks-satir">👑 Taht boş: ilk Tarihin Kralı sen ol!</span>';
+        echo '<span class="adc-hks-satir">👑 Taht boş · ilk kral sen ol!</span>';
     }
     echo '</span>';
     echo '<span class="adc-hks-btn" data-hks-btn>⚔ SEFERE ÇIK</span>';
@@ -42,21 +42,23 @@ add_action( 'bp_before_directory_activity_content', function() {
     ?>
 <style>
 .adc-hks,.adc-hks *{box-sizing:border-box;}
-.adc-hks{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:8px 10px;border:2px solid #0000ee;box-shadow:3px 3px 0 #0000ee;color:#fff3c4;text-decoration:none !important;font-size:12px;line-height:1.35;
+.adc-hks{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:8px 10px;border:2px solid #0000ee;box-shadow:3px 3px 0 #0000ee;color:#fff3c4;text-decoration:none !important;font-size:12px;line-height:1.35;
   background:#2a1a5e;background-image:linear-gradient(#3a2a7e 1px,transparent 1px),linear-gradient(90deg,#3a2a7e 1px,transparent 1px);background-size:12px 12px;transition:transform .08s,box-shadow .08s;}
 .adc-hks:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 #0000ee;}
 .adc-hks:active{transform:translate(1px,1px);box-shadow:1px 1px 0 #0000ee;}
-.adc-hks-sol{display:flex;align-items:center;gap:8px;flex:none;}
+.adc-hks-sol{display:flex;align-items:center;flex:none;}
 .adc-hks-sol .adc-hk-logo{image-rendering:pixelated;flex:none;}
-.adc-hks-ad b{display:block;color:#ffcc00;font-size:15px;letter-spacing:2px;text-shadow:2px 2px 0 #0000ee;}
-.adc-hks-ad small{display:block;color:#c8b6ff;font-size:11px;}
-.adc-hks-orta{flex:1 1 180px;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.adc-hks-ad{display:flex;align-items:baseline;gap:8px;white-space:nowrap;overflow:hidden;}
+.adc-hks-ad b{color:#ffcc00;font-size:15px;letter-spacing:2px;text-shadow:2px 2px 0 #0000ee;}
+.adc-hks-ad small{color:#c8b6ff;font-size:11px;overflow:hidden;text-overflow:ellipsis;}
+.adc-hks-orta{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px;}
 .adc-hks-satir{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#efeaff;}
 .adc-hks-satir b{color:#ffcc00;}
 .adc-hks-satir i{display:inline-block;width:10px;height:10px;border:1px solid #fff3c4;margin:0 4px 0 2px;vertical-align:-1px;}
-.adc-hks-btn{flex:none;border:2px solid #ffcc00;background:#ffcc00;color:#1a1a2e;font-weight:900;letter-spacing:1px;padding:6px 10px;box-shadow:2px 2px 0 #ff2bd6;font-size:12px;}
+.adc-hks-btn{flex:none;text-align:center;white-space:nowrap;border:2px solid #ffcc00;background:#ffcc00;color:#1a1a2e;font-weight:900;letter-spacing:1px;padding:6px 10px;box-shadow:2px 2px 0 #ff2bd6;font-size:12px;}
 .adc-hks-btn small{display:block;font-weight:400;letter-spacing:0;font-size:10px;}
-@media (max-width:520px){.adc-hks-orta{flex-basis:100%;order:3;}.adc-hks-btn{margin-left:auto;}}
+@media (max-width:520px){.adc-hks{gap:8px;padding:7px 8px;font-size:11px;}.adc-hks-sol .adc-hk-logo{width:30px;height:auto;}.adc-hks-ad small{display:none;}.adc-hks-ad b{font-size:13px;letter-spacing:1px;}
+  .adc-hks-btn{padding:5px 7px;font-size:11px;letter-spacing:0;}.adc-hks-btn small{font-size:9px;max-width:72px;overflow:hidden;text-overflow:ellipsis;}}
 @media (prefers-reduced-motion: reduce){.adc-hks{transition:none;}}
 </style>
 <script>(function(){
