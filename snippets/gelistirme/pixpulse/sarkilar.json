@@ -1,0 +1,8 @@
+[
+ {"id":"ilk-nabiz","ad":"İlk Nabız","bpm":92,"kok":60,"mod":"maj","prog":[0,5,3,4],"tohum":11,"enerji":0,"bolum":["i","A","B","A","o"]},
+ {"id":"piksel-kalp","ad":"Piksel Kalp","bpm":108,"kok":62,"mod":"maj","prog":[0,4,5,3],"tohum":23,"enerji":1,"bolum":["i","A","B","A","o"]},
+ {"id":"gece-monitoru","ad":"Gece Monitörü","bpm":100,"kok":57,"mod":"min","prog":[0,5,2,6],"tohum":37,"enerji":1,"bolum":["i","A","B","A","o"]},
+ {"id":"neon-damar","ad":"Neon Damar","bpm":122,"kok":64,"mod":"min","prog":[0,3,5,4],"tohum":41,"enerji":2,"bolum":["i","A","B","A","B","o"]},
+ {"id":"8bit-adrenalin","ad":"8-Bit Adrenalin","bpm":138,"kok":65,"mod":"maj","prog":[0,3,4,4],"tohum":53,"enerji":2,"bolum":["i","A","B","A","B","o"]},
+ {"id":"glitch-tasikardi","ad":"Glitch Taşikardi","bpm":156,"kok":62,"mod":"min","prog":[0,6,5,4],"tohum":67,"enerji":2,"bolum":["i","A","B","A","B","o"]}
+]
