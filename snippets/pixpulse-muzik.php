@@ -76,17 +76,12 @@ add_action( 'wp_footer', function() {
 
   // ===== Nota haritası: müzikten çıkar (melodi yükselince sağa, inince sola) =====
   P.nota = function(S, zor){
-    var M = P.bestele(S), adim = M.adim, liste = [], seri = {kolay: 4, normal: 2, zor: (S.bpm >= 140 ? 2 : 1)}[zor];
-    var serit = 1, onceD = null, sonS = -99, tutSon = {};
-    function ekle(s, l, uz){
-      for (var k = 0; k < 4 && tutSon[l] != null && tutSon[l] >= s; k++) l = (l + 1) % 4;
-      if (tutSon[l] != null && tutSon[l] >= s) return;
-      liste.push({t: s * adim, l: l, u: uz ? (s + uz) * adim : 0});
-      tutSon[l] = s + (uz || 0);
-    }
+    var M = P.bestele(S), adim = M.adim, aday = [], liste = [], seri = {kolay: 4, normal: 2, zor: (S.bpm >= 140 ? 2 : 1)}[zor];
+    var serit = 1, onceD = null, sonS = -99, tutSon = {}, sonL = -1, tekrar = 0;
+    // önce adaylar toplanır, sonra zaman sırasıyla yerleştirilir (uzun notanın şeridi doluysa yan şeride kayar)
     M.kick.forEach(function(k){
       var y = M.yapi[Math.floor(k.s / 16)].b;
-      if ((y === 'i' || y === 'o') && k.g > 0.6 && (k.s % 16 === 0 || zor !== 'kolay')) ekle(k.s, (k.s / 8) % 2 ? 2 : 1, 0);
+      if ((y === 'i' || y === 'o') && k.g > 0.6 && (k.s % 16 === 0 || zor !== 'kolay')) aday.push({s: k.s, l: (k.s / 8) % 2 ? 2 : 1, uz: 0});
     });
     M.lead.forEach(function(n){
       var y = M.yapi[Math.floor(n.s / 16)].b;
@@ -100,14 +95,34 @@ add_action( 'wp_footer', function() {
         if (serit > 3) serit = 2; if (serit < 0) serit = 1;
       }
       onceD = n.dd; sonS = n.s;
-      var uz = n.d >= (zor === 'kolay' ? 8 : 6) ? n.d - 2 : 0;
-      ekle(n.s, serit, uz);
-      if (zor === 'zor' && y === 'B' && n.s % 16 === 0) ekle(n.s, 3 - serit, 0);   // nakarat başında çift nota
+      aday.push({s: n.s, l: serit, uz: n.d >= (zor === 'kolay' ? 8 : 6) ? n.d - 2 : 0, m: 1});
+      if (zor === 'zor' && y === 'B' && n.s % 16 === 0) aday.push({s: n.s, l: 3 - serit, uz: 0, cift: 1});   // nakarat başında çift nota
     });
     if (zor === 'zor') M.snare.forEach(function(sn){
       if (M.yapi[Math.floor(sn.s / 16)].b !== 'A' || sn.g < 0.4) return;
-      for (var i = 0; i < liste.length; i++) if (Math.abs(liste[i].t - sn.s * adim) < adim * 1.5) return;
-      ekle(sn.s, sn.s % 32 === 4 ? 0 : 3, 0);
+      for (var i = 0; i < aday.length; i++) if (Math.abs(aday[i].s - sn.s) < 1.5) return;
+      aday.push({s: sn.s, l: sn.s % 32 === 4 ? 0 : 3, uz: 0});
+    });
+    if (zor === 'zor') M.kick.forEach(function(k, i){   // Zor: melodi boşluklarında bas davul da nota olur
+      var y = M.yapi[Math.floor(k.s / 16)].b;
+      if (y !== 'A' && y !== 'B') return;
+      for (var j = 0; j < aday.length; j++) if (Math.abs(aday[j].s - k.s) < 1.5) return;
+      aday.push({s: k.s, l: i % 2 ? 0 : 3, uz: 0});
+    });
+    if (zor === 'zor') M.lead.forEach(function(n){   // Zor: A bölümünde her ölçü başında da çift nota
+      if (M.yapi[Math.floor(n.s / 16)].b === 'A' && n.s % 32 === 0) aday.push({s: n.s, l: -1, uz: 0, cift: 1});
+    });
+    aday.sort(function(a, b){ return a.s - b.s || (a.cift ? 1 : 0) - (b.cift ? 1 : 0); });
+    aday.forEach(function(a){
+      var l = a.l < 0 ? 3 - Math.max(0, sonL) : a.l;
+      if (!a.cift) {   // aynı şeritte en fazla 3 nota üst üste
+        if (l === sonL) { tekrar++; if (tekrar >= 3) { l = l <= 1 ? l + 1 : l - 1; tekrar = 0; } } else tekrar = 0;
+      }
+      for (var k = 0; k < 4 && tutSon[l] != null && tutSon[l] >= a.s; k++) l = (l + 1) % 4;
+      if (tutSon[l] != null && tutSon[l] >= a.s) return;
+      liste.push({t: a.s * adim, l: l, u: a.uz ? (a.s + a.uz) * adim : 0});
+      tutSon[l] = a.s + a.uz;
+      if (!a.cift) sonL = l;
     });
     liste.sort(function(a, b){ return a.t - b.t || a.l - b.l; });
     return liste;

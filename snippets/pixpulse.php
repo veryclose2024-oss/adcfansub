@@ -7,6 +7,7 @@
  * Bu snippet: şarkı listesi, ayarlar, Mini Games kutucuğu, pencere CSS'i, sıralama, sunucu kontrolü, XP, günün şarkısı.
  * Diğerleri: "PixPulse - müzik" (pixpulse-muzik.php), "PixPulse - oyun" (pixpulse-oyun.php), "PixPulse - ekran" (pixpulse-ekran.php), "Rozet-PixPulse Pro".
  * Kendini oyun duyurularına, Haftanın Gamer'ına, ADÇ Panel üye kontrolüne ve oyun arşivine filtreyle ekler (başka snippet değişmez).
+ * 2026-11-08 düzeltme: notalar neredeyse hep mavi şeride yığılıyordu (çıkış kalp atışları şeritleri kilitliyordu); Zor'a bas davul notaları + A bölümünde çift notalar eklendi.
  * Kayıtlar: meta adc_pp_puan (toplam = her şarkının en iyisi), adc_pp_enler, adc_pp_sayac, adc_pp_basla, adc_pp_xp_gun; option adc_pp_gunluk.
  */
 
@@ -21,12 +22,12 @@ function adc_pp_ayar() {
 // Şarkılar. n = nota sayısı (kolay, normal, zor). Müzik kodu değişirse bu sayılar gelistirme/pixpulse/kontrol.js ile yeniden alınmalı.
 function adc_pp_sarkilar() {
     $l = array(
-        array( 'id' => 'ilk-nabiz',        'ad' => 'İlk Nabız',        'bpm' => 92,  'kok' => 60, 'mod' => 'maj', 'prog' => array( 0, 5, 3, 4 ), 'tohum' => 11, 'enerji' => 0, 'bolum' => 'iABAo',  'yildiz' => array( 1, 1, 2 ), 'n' => array( 79, 116, 125 ) ),
-        array( 'id' => 'piksel-kalp',      'ad' => 'Piksel Kalp',      'bpm' => 108, 'kok' => 62, 'mod' => 'maj', 'prog' => array( 0, 4, 5, 3 ), 'tohum' => 23, 'enerji' => 1, 'bolum' => 'iABAo',  'yildiz' => array( 1, 2, 3 ), 'n' => array( 85, 126, 146 ) ),
-        array( 'id' => 'gece-monitoru',    'ad' => 'Gece Monitörü',    'bpm' => 100, 'kok' => 57, 'mod' => 'min', 'prog' => array( 0, 5, 2, 6 ), 'tohum' => 37, 'enerji' => 1, 'bolum' => 'iABAo',  'yildiz' => array( 1, 2, 3 ), 'n' => array( 78, 129, 145 ) ),
-        array( 'id' => 'neon-damar',       'ad' => 'Neon Damar',       'bpm' => 122, 'kok' => 64, 'mod' => 'min', 'prog' => array( 0, 3, 5, 4 ), 'tohum' => 41, 'enerji' => 2, 'bolum' => 'iABABo', 'yildiz' => array( 2, 3, 4 ), 'n' => array( 118, 181, 227 ) ),
-        array( 'id' => '8bit-adrenalin',   'ad' => '8-Bit Adrenalin',  'bpm' => 138, 'kok' => 65, 'mod' => 'maj', 'prog' => array( 0, 3, 4, 4 ), 'tohum' => 53, 'enerji' => 2, 'bolum' => 'iABABo', 'yildiz' => array( 2, 3, 5 ), 'n' => array( 102, 201, 239 ) ),
-        array( 'id' => 'glitch-tasikardi', 'ad' => 'Glitch Taşikardi', 'bpm' => 156, 'kok' => 62, 'mod' => 'min', 'prog' => array( 0, 6, 5, 4 ), 'tohum' => 67, 'enerji' => 2, 'bolum' => 'iABABo', 'yildiz' => array( 2, 4, 5 ), 'n' => array( 84, 145, 159 ) ),
+        array( 'id' => 'ilk-nabiz',        'ad' => 'İlk Nabız',        'bpm' => 92,  'kok' => 60, 'mod' => 'maj', 'prog' => array( 0, 5, 3, 4 ), 'tohum' => 11, 'enerji' => 0, 'bolum' => 'iABAo',  'yildiz' => array( 1, 1, 2 ), 'n' => array( 79, 116, 153 ) ),
+        array( 'id' => 'piksel-kalp',      'ad' => 'Piksel Kalp',      'bpm' => 108, 'kok' => 62, 'mod' => 'maj', 'prog' => array( 0, 4, 5, 3 ), 'tohum' => 23, 'enerji' => 1, 'bolum' => 'iABAo',  'yildiz' => array( 1, 2, 3 ), 'n' => array( 85, 126, 176 ) ),
+        array( 'id' => 'gece-monitoru',    'ad' => 'Gece Monitörü',    'bpm' => 100, 'kok' => 57, 'mod' => 'min', 'prog' => array( 0, 5, 2, 6 ), 'tohum' => 37, 'enerji' => 1, 'bolum' => 'iABAo',  'yildiz' => array( 1, 2, 3 ), 'n' => array( 78, 129, 167 ) ),
+        array( 'id' => 'neon-damar',       'ad' => 'Neon Damar',       'bpm' => 122, 'kok' => 64, 'mod' => 'min', 'prog' => array( 0, 3, 5, 4 ), 'tohum' => 41, 'enerji' => 2, 'bolum' => 'iABABo', 'yildiz' => array( 2, 3, 4 ), 'n' => array( 118, 181, 275 ) ),
+        array( 'id' => '8bit-adrenalin',   'ad' => '8-Bit Adrenalin',  'bpm' => 138, 'kok' => 65, 'mod' => 'maj', 'prog' => array( 0, 3, 4, 4 ), 'tohum' => 53, 'enerji' => 2, 'bolum' => 'iABABo', 'yildiz' => array( 2, 3, 5 ), 'n' => array( 102, 201, 277 ) ),
+        array( 'id' => 'glitch-tasikardi', 'ad' => 'Glitch Taşikardi', 'bpm' => 156, 'kok' => 62, 'mod' => 'min', 'prog' => array( 0, 6, 5, 4 ), 'tohum' => 67, 'enerji' => 2, 'bolum' => 'iABABo', 'yildiz' => array( 2, 4, 5 ), 'n' => array( 84, 145, 201 ) ),
     );
     $sonuc = array();
     foreach ( $l as $s ) {
