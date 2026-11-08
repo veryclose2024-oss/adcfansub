@@ -11,19 +11,34 @@
     var olc = OLC[S.mod], adim = 60 / S.bpm / 4, en = S.enerji;
     function ton(d, okt){ var o = Math.floor(d / 7); return S.kok + olc[((d % 7) + 7) % 7] + 12 * (o + (okt || 0)); }
     var yapi = [];
-    S.bolum.forEach(function(b){ var n = (b === 'i' || b === 'o') ? 2 : 8; for (var i = 0; i < n; i++) yapi.push({b: b, i: i}); });
-    function motif(r, yog){
-      var on = [0];
-      for (var s = 1; s < 32; s++) {
-        var p = s % 8 === 0 ? 0.8 : s % 4 === 0 ? 0.62 : s % 2 === 0 ? 0.3 + yog * 0.12 : (yog >= 2 ? 0.1 : 0);
-        if (r() < p) on.push(s);
+    var kez = {};
+    S.bolum.forEach(function(b){ var n = (b === 'i' || b === 'o') ? 2 : 8, k = kez[b] = (kez[b] == null ? 0 : kez[b] + 1); for (var i = 0; i < n; i++) yapi.push({b: b, i: i, k: k}); });
+    // Ritim hücreleri (bir vuruş = 4 adım): düz, ikili, noktalı, dörtlü, senkop, es... [adımlar, en az yoğunluk]
+    var HUCRE = [[[0], 0], [[0, 2], 0], [[], 0], [[0], 0], [[0, 3], 1], [[0, 2, 3], 1], [[0, 1, 2], 1], [[2], 1], [[1, 3], 2], [[0, 1, 2, 3], 3], [[0, 1, 3], 2], [[3], 2]];
+    function ritim(r, yog){
+      var on = [];
+      for (var v = 0; v < 8; v++) {
+        var c;
+        if (v === 0 || v === 4) c = [[0], [0, 2], [0, 3], [0, 2, 3]][Math.floor(r() * Math.min(4, 1 + yog))];
+        else { var hv = HUCRE.filter(function(h){ return h[1] <= yog; }); c = hv[Math.floor(r() * hv.length)][0]; }
+        if (v === 7 && r() < 0.5) c = [0];   // cümle sonunda nefes
+        c.forEach(function(x){ on.push(v * 4 + x); });
       }
-      var d = 2 + Math.floor(r() * 3), m = [], ad = [-2, -1, -1, 0, 1, 1, 2, 3, -3, 1];
+      return on;
+    }
+    function ezgi(r, on){
+      var d = 2 + Math.floor(r() * 3), m = [], ad = [-2, -1, -1, 0, 1, 1, 2, 3, -3, 1, -1, 2];
       on.forEach(function(s){ d += ad[Math.floor(r() * ad.length)]; if (d < 0) d = 1 + Math.floor(r() * 2); if (d > 9) d = 7; m.push({s: s, d: d}); });
       return m;
     }
-    var mA = motif(rng(S.tohum * 7 + 1), en), mA2 = motif(rng(S.tohum * 7 + 2), en),
-        mB = motif(rng(S.tohum * 7 + 3), Math.min(2, en + 1)), mB2 = motif(rng(S.tohum * 7 + 4), Math.min(2, en + 1));
+    // Her bölüm tekrarında 4 ikişer ölçülük cümle: 1. motif, aynı ritim yeni ezgi, yeni motif, kapanış. İkinci kez gelen bölüm daha yoğun.
+    var cumle = {};
+    function cumleler(b, k){
+      var ad = b + k; if (cumle[ad]) return cumle[ad];
+      var yog = Math.min(3, en + (b === 'B' ? 1 : 0) + k), t = S.tohum * 7 + (b === 'B' ? 50 : 10) + k * 100;
+      var r1 = ritim(rng(t + 1), yog), r3 = ritim(rng(t + 3), yog), r4 = ritim(rng(t + 4), Math.max(0, yog - 1));
+      return (cumle[ad] = [ezgi(rng(t + 5), r1), ezgi(rng(t + 6), r1), ezgi(rng(t + 7), r3), ezgi(rng(t + 8), r4)]);
+    }
     var M = {lead: [], bass: [], arp: [], kick: [], snare: [], hat: [], adim: adim, olcu: yapi.length, yapi: yapi};
     function akor(o){ var c = S.prog[o % S.prog.length]; return [c, c + 2, c + 4]; }
     function yakin(d, ak){ var en_ = d, f = 99; ak.forEach(function(a){ for (var k = -1; k <= 1; k++) { var x = a + 7 * (Math.floor(d / 7) + k); if (Math.abs(x - d) < f) { f = Math.abs(x - d); en_ = x; } } }); return en_; }
@@ -48,7 +63,7 @@
       if (b === 'B') for (var a = 0; a < 16; a += 2) M.arp.push({s: t0 + a, d: 2, n: ton(ak[(a / 2) % 3], 1)});
       // melodi: iki ölçülük motif, akora oturtulur
       if (b === 'A' || b === 'B') {
-        var cift = Math.floor(y.i / 2), mot = b === 'A' ? (cift === 3 ? mA2 : mA) : (cift === 3 ? mB2 : mB), yari = (y.i % 2) * 16;
+        var mot = cumleler(b, y.k)[Math.floor(y.i / 2)], yari = (y.i % 2) * 16;
         mot.forEach(function(n, k){
           if (n.s < yari || n.s >= yari + 16) return;
           var son = k + 1 < mot.length ? mot[k + 1].s : 32, d = n.d + (b === 'B' ? 2 : 0);
@@ -64,27 +79,28 @@
 
   // ===== Nota haritası: müzikten çıkar (melodi yükselince sağa, inince sola) =====
   P.nota = function(S, zor){
-    var M = P.bestele(S), adim = M.adim, aday = [], liste = [], seri = {kolay: 4, normal: 2, zor: (S.bpm >= 140 ? 2 : 1)}[zor];
-    var serit = 1, onceD = null, sonS = -99, tutSon = {}, sonL = -1, tekrar = 0;
-    // önce adaylar toplanır, sonra zaman sırasıyla yerleştirilir (uzun notanın şeridi doluysa yan şeride kayar)
+    var M = P.bestele(S), adim = M.adim, aday = [], liste = [], hizli = S.bpm >= 140;
+    var seri = {kolay: 4, normal: 2, zor: hizli ? 2 : 1}[zor], izgara = {kolay: 2, normal: hizli ? 2 : 1, zor: 1}[zor];
+    var onceD = null, onceL = 1, sonS = -99, tutSon = {}, sonL = -1, tekrar = 0, pencere = [];
+    // Her 2 ölçülük cümlede melodinin en alçak / en yüksek notası bulunur: alçak nota solda (pembe), yüksek sağda (mavi)
+    var ar = {};
+    M.lead.forEach(function(n){ var c = Math.floor(n.s / 32), x = ar[c] || (ar[c] = [99, -99]); x[0] = Math.min(x[0], n.dd); x[1] = Math.max(x[1], n.dd); });
     M.kick.forEach(function(k){
       var y = M.yapi[Math.floor(k.s / 16)].b;
       if ((y === 'i' || y === 'o') && k.g > 0.6 && (k.s % 16 === 0 || zor !== 'kolay')) aday.push({s: k.s, l: (k.s / 8) % 2 ? 2 : 1, uz: 0});
     });
     M.lead.forEach(function(n){
       var y = M.yapi[Math.floor(n.s / 16)].b;
-      if (y === 'o') return;
-      if (zor === 'kolay' && n.s % 4) return;
-      if (zor === 'normal' && n.s % 2) return;
-      if (n.s - sonS < seri) return;
-      if (onceD != null) {
-        var f = n.dd - onceD;
-        if (f > 0) serit += f > 2 ? 2 : 1; else if (f < 0) serit -= f < -2 ? 2 : 1;
-        if (serit > 3) serit = 2; if (serit < 0) serit = 1;
+      if (y === 'o' || n.s % izgara || n.s - sonS < seri) return;
+      var x = ar[Math.floor(n.s / 32)], l = x[1] > x[0] ? Math.round((n.dd - x[0]) / (x[1] - x[0]) * 3) : onceL;
+      if (onceD != null) {   // melodinin yönüne uy: aynı nota aynı renk, çıkınca sağa, inince sola
+        if (n.dd === onceD) l = onceL;
+        else if (n.dd > onceD && l <= onceL) l = Math.min(3, onceL + 1);
+        else if (n.dd < onceD && l >= onceL) l = Math.max(0, onceL - 1);
       }
-      onceD = n.dd; sonS = n.s;
-      aday.push({s: n.s, l: serit, uz: n.d >= (zor === 'kolay' ? 8 : 6) ? n.d - 2 : 0, m: 1});
-      if (zor === 'zor' && y === 'B' && n.s % 16 === 0) aday.push({s: n.s, l: 3 - serit, uz: 0, cift: 1});   // nakarat başında çift nota
+      onceD = n.dd; onceL = l; sonS = n.s;
+      aday.push({s: n.s, l: l, uz: n.d >= (zor === 'kolay' ? 8 : 6) ? n.d - 2 : 0});
+      if (zor === 'zor' && y === 'B' && n.s % 16 === 0) aday.push({s: n.s, l: -1, uz: 0, cift: 1});   // nakarat başında çift nota
     });
     if (zor === 'zor') M.snare.forEach(function(sn){
       if (M.yapi[Math.floor(sn.s / 16)].b !== 'A' || sn.g < 0.4) return;
@@ -103,14 +119,21 @@
     aday.sort(function(a, b){ return a.s - b.s || (a.cift ? 1 : 0) - (b.cift ? 1 : 0); });
     aday.forEach(function(a){
       var l = a.l < 0 ? 3 - Math.max(0, sonL) : a.l;
-      if (!a.cift) {   // aynı şeritte en fazla 3 nota üst üste
+      if (!a.cift) {
+        // aynı renk en fazla 3 kez üst üste; son 8 notada bir renk 4'ü geçmesin (en az kullanılan komşuya kayar)
         if (l === sonL) { tekrar++; if (tekrar >= 3) { l = l <= 1 ? l + 1 : l - 1; tekrar = 0; } } else tekrar = 0;
+        var say = [0, 0, 0, 0]; pencere.forEach(function(x){ say[x]++; });
+        if (say[l] >= 4) {
+          var en = -1;
+          [l - 1, l + 1, l - 2, l + 2, l - 3, l + 3].forEach(function(x){ if (x >= 0 && x <= 3 && x !== sonL && (en < 0 || say[x] < say[en])) en = x; });
+          if (en >= 0) l = en;
+        }
       }
       for (var k = 0; k < 4 && tutSon[l] != null && tutSon[l] >= a.s; k++) l = (l + 1) % 4;
       if (tutSon[l] != null && tutSon[l] >= a.s) return;
       liste.push({t: a.s * adim, l: l, u: a.uz ? (a.s + a.uz) * adim : 0});
       tutSon[l] = a.s + a.uz;
-      if (!a.cift) sonL = l;
+      if (!a.cift) { sonL = l; pencere.push(l); if (pencere.length > 8) pencere.shift(); }
     });
     liste.sort(function(a, b){ return a.t - b.t || a.l - b.l; });
     return liste;
